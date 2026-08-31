@@ -25,7 +25,10 @@
     --filet:rgba(255,255,255,.13);
     --rayon:10px;        /* 0 pour des angles vifs */
     --mx:0; --my:0;      /* inclinaison normalisée -1..1 */
-    --force:.22;         /* intensité au repos */
+    --force:.3;          /* intensité au repos */
+    /* ▼ LE réglage à toucher si l'effet est trop faible ou trop fort.
+         .4 = discret · .75 = équilibré · 1.2 = très marqué */
+    --intensite:.75;
   }
 
   *{margin:0;padding:0;box-sizing:border-box}
@@ -49,7 +52,7 @@
   /* ================= Carte ================= */
   .scene{perspective:1500px; perspective-origin:50% 45%}
   .inclinaison{
-    transform:rotateY(calc(var(--mx) * 9deg)) rotateX(calc(var(--my) * -9deg));
+    transform:rotateY(calc(var(--mx) * 15deg)) rotateX(calc(var(--my) * -15deg));
     transition:transform .14s ease-out; transform-style:preserve-3d;
   }
   .pivot{
@@ -80,21 +83,21 @@
   .foil{
     background:repeating-linear-gradient(103deg,
       rgba(255,255,255,0)   0px,
-      rgba(255,90,190,.34)  9px,
+      rgba(255,90,190,.58)  9px,
       rgba(255,255,255,0)   19px,
-      rgba(255,205,80,.30)  29px,
+      rgba(255,205,80,.52)  29px,
       rgba(255,255,255,0)   39px,
-      rgba(80,235,255,.34)  49px,
+      rgba(80,235,255,.58)  49px,
       rgba(255,255,255,0)   60px);
-    background-position:calc(50% + var(--mx)*150px) calc(50% + var(--my)*150px);
+    background-position:calc(50% + var(--mx)*230px) calc(50% + var(--my)*230px);
     /* le vernis ne s'allume QUE là où la lumière frappe — c'est ce masque
        mobile qui distingue un vrai foil d'un motif rayé imprimé. */
-    -webkit-mask-image:radial-gradient(ellipse 70% 55% at calc(50% + var(--mx)*45%) calc(50% + var(--my)*45%),
-                       #000 0%, rgba(0,0,0,.45) 38%, transparent 68%);
-            mask-image:radial-gradient(ellipse 70% 55% at calc(50% + var(--mx)*45%) calc(50% + var(--my)*45%),
-                       #000 0%, rgba(0,0,0,.45) 38%, transparent 68%);
+    -webkit-mask-image:radial-gradient(ellipse 82% 66% at calc(50% + var(--mx)*45%) calc(50% + var(--my)*45%),
+                       #000 0%, rgba(0,0,0,.55) 45%, transparent 78%);
+            mask-image:radial-gradient(ellipse 82% 66% at calc(50% + var(--mx)*45%) calc(50% + var(--my)*45%),
+                       #000 0%, rgba(0,0,0,.55) 45%, transparent 78%);
     mix-blend-mode:screen;
-    opacity:calc(var(--force) * .42);
+    opacity:calc(var(--force) * var(--intensite) * .95);
     transition:background-position .14s ease-out, opacity .3s ease-out,
                -webkit-mask-image .14s ease-out, mask-image .14s ease-out;
   }
@@ -108,15 +111,15 @@
     background-size:280% 280%;
     background-position:calc(50% + var(--mx)*50%) calc(50% + var(--my)*50%);
     mix-blend-mode:color-dodge;
-    opacity:calc(var(--force) * .11);
+    opacity:calc(var(--force) * var(--intensite) * .2);
     transition:background-position .14s ease-out, opacity .3s ease-out;
   }
   /* spéculaire : le point de lumière */
   .reflet{
     background:radial-gradient(circle at calc(50% + var(--mx)*38%) calc(50% + var(--my)*38%),
-              rgba(255,255,255,.34), rgba(255,255,255,.04) 38%, transparent 60%);
+              rgba(255,255,255,.5), rgba(255,255,255,.06) 40%, transparent 64%);
     mix-blend-mode:soft-light;
-    opacity:calc(.35 + var(--force)*.65);
+    opacity:calc(.4 + var(--force)*.6);
     transition:background .14s ease-out;
   }
 
@@ -152,7 +155,13 @@
     transition:transform .15s ease, opacity .15s ease;
   }
   .bouton:active{transform:scale(.97); opacity:.9}
-  .indice{font-size:12px; color:var(--attenue)}
+  .indice{font-size:12px; color:var(--attenue); text-align:center}
+  .temoin{
+    font:400 10.5px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;
+    color:#5a5a66; letter-spacing:.04em; text-align:center;
+  }
+  .temoin.actif{color:#4ad991}
+  .temoin.refuse{color:#e0725f}
 
   @media (prefers-reduced-motion:reduce){
     .inclinaison,.pivot,.foil,.lavis,.reflet{transition:none}
@@ -195,6 +204,7 @@
   <div class="actions">
     <a class="bouton" href="contact.vcf">Ajouter à mes contacts</a>
     <span class="indice" id="indice">Touchez la carte pour la retourner</span>
+    <span class="temoin" id="temoin">capteur : en attente du premier toucher</span>
   </div>
 
 <script>
@@ -202,27 +212,46 @@
   const racine = document.documentElement;
   const carte  = document.getElementById('carte');
   const indice = document.getElementById('indice');
+  const temoin = document.getElementById('temoin');
 
-  const borne   = (v,a,b) => Math.min(b, Math.max(a, v));
-  const REPOS   = .22;                 // intensité quand rien ne bouge
-  let   pilote  = null;                // 'gyro' | 'pointeur' | 'doigt'
+  const borne = (v,a,b) => Math.min(b, Math.max(a, v));
+  const REPOS = .30;          // intensité quand rien ne bouge
+  const SENS  = 16;           // degrés d'inclinaison pour la pleine amplitude
+  const LISSE = .18;          // 0 = figé, 1 = brut. Amortit la nervosité du capteur.
 
-  const applique = (mx,my,force) => {
-    racine.style.setProperty('--mx', mx.toFixed(3));
-    racine.style.setProperty('--my', my.toFixed(3));
-    racine.style.setProperty('--force', force.toFixed(3));
-  };
+  let pilote = null;                              // 'gyro' | 'doigt' | 'souris'
+  let cible  = { mx:0, my:0, force:REPOS };       // ce que l'entrée demande
+  let actuel = { mx:0, my:0, force:REPOS };       // ce qui est réellement affiché
+  let brut   = { g:0, b:0 };                      // deltas capteur, pour le témoin
 
-  /* ---- Animation de repos : la carte respire tant que rien ne la pilote ---- */
+  /* ---- Boucle unique : anime au repos, lisse toujours, applique une seule fois ---- */
   const depart = performance.now();
-  (function respire(t){
-    if (!pilote) {
+  let dernierTexte = 0;
+
+  (function boucle(t){
+    if (!pilote) {                                 // respiration tant que rien ne pilote
       const p = (t - depart) / 5200;
-      applique(Math.sin(p * 2 * Math.PI) * .45,
-               Math.cos(p * 2 * Math.PI) * .3,
-               REPOS);
+      cible.mx = Math.sin(p * 2 * Math.PI) * .45;
+      cible.my = Math.cos(p * 2 * Math.PI) * .30;
+      cible.force = REPOS;
     }
-    requestAnimationFrame(respire);
+    actuel.mx    += (cible.mx    - actuel.mx)    * LISSE;
+    actuel.my    += (cible.my    - actuel.my)    * LISSE;
+    actuel.force += (cible.force - actuel.force) * LISSE;
+
+    racine.style.setProperty('--mx', actuel.mx.toFixed(3));
+    racine.style.setProperty('--my', actuel.my.toFixed(3));
+    racine.style.setProperty('--force', actuel.force.toFixed(3));
+
+    if (pilote === 'gyro' && t - dernierTexte > 150) {   // témoin de diagnostic
+      dernierTexte = t;
+      if (temoin.className !== 'temoin actif') temoin.className = 'temoin actif';
+      temoin.textContent =
+        `capteur ✓  γ ${brut.g >= 0 ? '+' : ''}${brut.g.toFixed(0)}°  ` +
+        `β ${brut.b >= 0 ? '+' : ''}${brut.b.toFixed(0)}°  ` +
+        `int ${(actuel.force * 100).toFixed(0)}%`;
+    }
+    requestAnimationFrame(boucle);
   })(depart);
 
   /* ---- Retournement ---- */
@@ -232,15 +261,17 @@
     if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); retourner(); }
   });
 
-  /* ---- Gyroscope : la carte accroche la lumière quand on incline ---- */
-  let repos = null;
+  /* ---- Gyroscope ---- */
+  let neutre = null;
   const surOrientation = e => {
     if (e.gamma == null || e.beta == null) return;
-    if (repos === null) repos = { g:e.gamma, b:e.beta };
+    if (neutre === null) neutre = { g:e.gamma, b:e.beta };   // neutre = posture initiale
     pilote = 'gyro';
-    const mx = borne((e.gamma - repos.g) / 30, -1, 1);
-    const my = borne((e.beta  - repos.b) / 30, -1, 1);
-    applique(mx, my, Math.max(REPOS, Math.min(1, Math.hypot(mx,my))));
+    brut.g = e.gamma - neutre.g;
+    brut.b = e.beta  - neutre.b;
+    cible.mx = borne(brut.g / SENS, -1, 1);
+    cible.my = borne(brut.b / SENS, -1, 1);
+    cible.force = Math.max(REPOS, Math.min(1, Math.hypot(cible.mx, cible.my)));
   };
 
   const besoinPermission =
@@ -249,16 +280,32 @@
 
   const activerGyro = async () => {
     try {
-      if (besoinPermission && await DeviceOrientationEvent.requestPermission() !== 'granted') return false;
+      if (besoinPermission) {
+        const r = await DeviceOrientationEvent.requestPermission();
+        if (r !== 'granted') { temoin.textContent = 'capteur ✗ refusé — glissez le doigt sur la carte';
+                               temoin.className = 'temoin refuse'; return false; }
+      }
       window.addEventListener('deviceorientation', surOrientation);
+      temoin.className = 'temoin actif';
+      // Si aucun échantillon n'arrive, le capteur est absent : on le dit.
+      setTimeout(() => {
+        if (pilote !== 'gyro') {
+          temoin.textContent = 'capteur ✗ aucune donnée — glissez le doigt sur la carte';
+          temoin.className = 'temoin refuse';
+        }
+      }, 2500);
       return true;
-    } catch { return false; }
+    } catch (err) {
+      temoin.textContent = 'capteur ✗ ' + err.message;
+      temoin.className = 'temoin refuse';
+      return false;
+    }
   };
 
   if (besoinPermission) {
-    // iOS 13+ : la permission doit partir d'un geste. On l'accroche au 1er contact.
     document.body.addEventListener('pointerdown', async function once(){
       document.body.removeEventListener('pointerdown', once);
+      temoin.textContent = 'capteur : autorisation demandée…';
       if (await activerGyro()) indice.textContent = 'Inclinez le téléphone';
     }, { once:true });
   } else {
@@ -268,20 +315,20 @@
   /* ---- Repli 1 : souris (bureau) ---- */
   window.addEventListener('pointermove', e => {
     if (pilote === 'gyro' || e.pointerType !== 'mouse') return;
-    pilote = 'pointeur';
-    const mx = (e.clientX / innerWidth  - .5) * 2;
-    const my = (e.clientY / innerHeight - .5) * 2;
-    applique(mx, my, Math.max(REPOS, Math.min(1, Math.hypot(mx,my))));
+    pilote = 'souris';
+    cible.mx = (e.clientX / innerWidth  - .5) * 2;
+    cible.my = (e.clientY / innerHeight - .5) * 2;
+    cible.force = Math.max(REPOS, Math.min(1, Math.hypot(cible.mx, cible.my)));
   }, { passive:true });
 
-  /* ---- Repli 2 : glisser du doigt (tactile sans gyroscope) ---- */
+  /* ---- Repli 2 : glisser du doigt ---- */
   carte.addEventListener('touchmove', e => {
     if (pilote === 'gyro') return;
     pilote = 'doigt';
     const t = e.touches[0], r = carte.getBoundingClientRect();
-    const mx = borne(((t.clientX - r.left) / r.width  - .5) * 2, -1, 1);
-    const my = borne(((t.clientY - r.top ) / r.height - .5) * 2, -1, 1);
-    applique(mx, my, Math.max(REPOS, Math.min(1, Math.hypot(mx,my))));
+    cible.mx = borne(((t.clientX - r.left) / r.width  - .5) * 2, -1, 1);
+    cible.my = borne(((t.clientY - r.top ) / r.height - .5) * 2, -1, 1);
+    cible.force = Math.max(REPOS, Math.min(1, Math.hypot(cible.mx, cible.my)));
   }, { passive:true });
 })();
 </script>
