@@ -1,0 +1,12 @@
+{
+  "prenom": "Prénom",
+  "nom": "Nom",
+  "poste": "Directeur artistique",
+  "societe": "Société",
+  "telephone": "+33600000000",
+  "email": "prenom.nom@societe.com",
+  "site": "https://societe.com",
+  "linkedin": "https://www.linkedin.com/in/placeholder",
+  "adresse": "Paris, France",
+  "urlCarte": "https://exemple.vercel.app"
+}

@@ -1,0 +1,13 @@
+BEGIN:VCARD
+VERSION:3.0
+N:Nom;Prénom;;;
+FN:Prénom Nom
+ORG:Société
+TITLE:Directeur artistique
+TEL;TYPE=CELL,VOICE:+33600000000
+EMAIL;TYPE=INTERNET,WORK:prenom.nom@societe.com
+URL:https://societe.com
+item1.URL:https://www.linkedin.com/in/placeholder
+item1.X-ABLabel:LinkedIn
+ADR;TYPE=WORK:;;Paris, France;;;;
+END:VCARD
