@@ -5,8 +5,16 @@ iOS, retournement 3D vers le QR, vCard native, animation d'ouverture.
 
 ℹ️ **Aucun effet lumineux.** Un halo animé et une inclinaison au doigt ont
 existé puis ont été retirés (01/09/2026) : ils coûtaient cher sur mobile et
-n'existaient pas dans le fichier Figma. La carte est immobile jusqu'au tap.
-Ne pas les réintroduire sans mesurer — voir `?perf`.
+n'existaient pas dans le fichier Figma. Ne pas les réintroduire sans mesurer —
+voir `?perf`.
+
+ℹ️ **La carte flotte doucement.** Deux animations CSS imbriquées, `flotte`
+(translation, 7 s) et `derive` (rotation, 11 s). Périodes différentes : la
+combinaison ne se répète qu'au bout de 77 s, donc aucune boucle perceptible.
+⚠️ **Uniquement des `transform`** — composées par le GPU, ni repaint ni
+recalcul de mise en page. C'est ce qui distingue ce flottement du halo retiré.
+Ne jamais y animer une ombre, un filtre ou une couleur. Le mouvement se fige
+pendant le retournement (classe `.fige`).
 Aucun compte développeur, aucun abonnement, aucune permission demandée.
 
 Source du design : fichier Figma `Carte_Visite_Inqom`, frames `Recto` (337:77)

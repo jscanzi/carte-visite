@@ -69,6 +69,18 @@
     to  {opacity:1; transform:perspective(1200px) translateY(0)    scale(1)    rotateX(0deg)}
   }
   @keyframes monte{from{opacity:0; transform:translateY(11px)} to{opacity:1; transform:none}}
+  /* Flottement. Uniquement des transforms, donc composé par le GPU :
+     ni repaint, ni recalcul de mise en page. Deux périodes différentes
+     (7 s et 11 s) sur deux éléments imbriqués : la combinaison ne se
+     répète qu'au bout de 77 s, l'œil n'y perçoit aucune boucle. */
+  @keyframes flotte{
+    0%,100%{transform:translate3d(0,-5px,0)}
+    50%    {transform:translate3d(0, 5px,0)}
+  }
+  @keyframes derive{
+    0%,100%{transform:rotate(-.45deg)}
+    50%    {transform:rotate(.45deg)}
+  }
   @keyframes balayage{
     0%{transform:translateX(-160%) skewX(-14deg); opacity:0}
     22%{opacity:.7} 78%{opacity:.7}
@@ -77,6 +89,11 @@
   /* Pas de preserve-3d ici : ce bloc anime l'opacité, il doit rester
      HORS du contexte 3D de la carte (voir CAUSE 1 en commentaire du HTML). */
   .entree{animation:entree 1s cubic-bezier(.16,1,.3,1) both}
+  /* Démarre après l'entrée, sinon les deux mouvements se marchent dessus. */
+  .flotte{animation:flotte 7s ease-in-out 1s infinite}
+  .derive{animation:derive 11s ease-in-out 1s infinite}
+  /* Figé pendant le retournement : rien ne doit concurrencer la rotation. */
+  .fige,.fige .derive{animation-play-state:paused}
 
   /* ===================== Carte ===================== */
   .scene{perspective:1500px; perspective-origin:50% 45%}
@@ -182,7 +199,7 @@
   .indice{font-size:12px; color:rgba(42,15,46,.55); text-align:center}
 
   @media (prefers-reduced-motion:reduce){
-    .entree,.photo,.identite,.coordonnees,.logo,.actions{animation:none}
+    .entree,.photo,.identite,.coordonnees,.logo,.actions,.flotte,.derive{animation:none}
     .balayage{display:none}
     .pivot{transition:none}
   }
@@ -193,7 +210,9 @@
   <!-- .entree est À L'EXTÉRIEUR de .scene : elle anime l'opacité, ce qui
        aplatirait le contexte 3D et ferait réapparaître la face arrière. -->
   <div class="entree">
-    <div class="scene">
+    <div class="flotte" id="flottement">
+      <div class="derive">
+        <div class="scene">
       <div class="pivot" id="carte" role="button" tabindex="0" aria-label="Retourner la carte">
 
         <div class="face recto">
@@ -224,9 +243,11 @@
           <div class="logo"><img src="assets/logo-sombre.svg" alt="Inqom by Visma"></div>
         </div>
 
-      </div>
-    </div>
-  </div>
+      </div><!-- .pivot -->
+        </div><!-- .scene -->
+      </div><!-- .derive -->
+    </div><!-- .flotte -->
+  </div><!-- .entree -->
 
   <div class="actions">
     <a class="bouton" href="contact.vcf">Ajouter à mes contacts</a>
@@ -284,8 +305,11 @@
     }, DUREE_ROTATION + 150);
   };
 
+  const flottement = document.getElementById('flottement');
   const retourner = () => {
     demarrerSonde();
+    flottement.classList.add('fige');
+    setTimeout(() => flottement.classList.remove('fige'), DUREE_ROTATION);
     carte.classList.toggle('retournee');                 // lance la rotation
     clearTimeout(bascule);
     // Échange des faces au moment exact du profil. La courbe est symétrique,
