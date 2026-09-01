@@ -106,9 +106,9 @@
   .pivot.montreVerso .recto{opacity:0}
   .pivot.montreVerso .verso{opacity:1}
 
-  /* Calque de décor : c'est LUI qui rogne et qui isole le fondu,
-     pas la face — sinon Safari casse le backface-visibility. */
-  .plan{position:absolute; inset:0; overflow:hidden; isolation:isolate; z-index:0}
+  /* Calque de décor : c'est LUI qui rogne, pas la face —
+     overflow:hidden sur une face casse son rendu 3D dans Safari. */
+  .plan{position:absolute; inset:0; overflow:hidden; z-index:0}
   .verso{background:var(--lilas); transform:rotateY(180deg); opacity:0}
 
   /* Forme de fond — position et rotation reprises telles quelles du fichier Figma */
@@ -136,7 +136,6 @@
       transparent 64%);
     transform:translate3d(calc(var(--mx) * 39%), calc(var(--my) * 39%), 0);
   }
-  .iris{mix-blend-mode:screen}
   .iris.chaude{
     background:radial-gradient(29% 22% at 50% 50%,
       rgba(255,105,200,calc(.22 * var(--intensite))), transparent 62%);

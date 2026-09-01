@@ -85,6 +85,13 @@ tracé du spark ; il n'est plus affiché.
 ⚠️ **Ces images sont opaques**, la couleur de fond y est incorporée. Changer
 `--aubergine` ou `--lilas` impose de réexporter depuis Figma.
 
+ℹ️ **Pas de `mix-blend-mode`** sur les calques d'irisation : il forçait le
+compositeur à relire le fond à chaque frame. Conséquence assumée — sur le fond
+clair du verso, la teinte froide vire au bleu au lieu d'éclaircir. Si ce bleu
+gêne, remplacer les couleurs de `.iris.chaude` / `.iris.froide` par des valeurs
+de la palette (bloom `#EBC5F2`, bloom-vif `#B28FE0`) plutôt que de remettre le
+blend. Sur le recto sombre, l'écart est imperceptible.
+
 ⚠️ **La lumière est figée pendant le retournement** (`enRotation` dans le JS) :
 inutile de composer un éclairage sur une carte qui tourne, autant laisser la
 machine à la rotation.
