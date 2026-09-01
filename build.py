@@ -23,19 +23,20 @@ pathlib.Path("qr.svg").write_text(
     f'<path fill="currentColor" d="{"".join(d)}"/></svg>', encoding="utf-8")
 
 # ---------- vCard 3.0 (le format qu'iOS avale sans broncher) ----------
-v = [
-    "BEGIN:VCARD", "VERSION:3.0",
-    f'N:{cfg["nom"]};{cfg["prenom"]};;;',
-    f'FN:{cfg["prenom"]} {cfg["nom"]}',
-    f'ORG:{cfg["societe"]}',
-    f'TITLE:{cfg["poste"]}',
-    f'TEL;TYPE=CELL,VOICE:{cfg["telephone"]}',
-    f'EMAIL;TYPE=INTERNET,WORK:{cfg["email"]}',
-    f'URL:{cfg["site"]}',
-    f'item1.URL:{cfg["linkedin"]}', "item1.X-ABLabel:LinkedIn",
-    f'ADR;TYPE=WORK:;;{cfg["adresse"]};;;;',
-    "END:VCARD",
-]
+v = ["BEGIN:VCARD", "VERSION:3.0",
+     f'N:{cfg["nom"]};{cfg["prenom"]};;;',
+     f'FN:{cfg["prenom"]} {cfg["nom"]}']
+
+# Les champs vides sont omis : une vCard avec des lignes vides affiche
+# des entrées fantômes dans les Contacts iOS.
+if cfg.get("societe"):   v.append(f'ORG:{cfg["societe"]}')
+if cfg.get("poste"):     v.append(f'TITLE:{cfg["poste"]}')
+if cfg.get("telephone"): v.append(f'TEL;TYPE=CELL,VOICE:{cfg["telephone"]}')
+if cfg.get("email"):     v.append(f'EMAIL;TYPE=INTERNET,WORK:{cfg["email"]}')
+if cfg.get("site"):      v.append(f'URL:{cfg["site"]}')
+if cfg.get("linkedin"):  v += [f'item1.URL:{cfg["linkedin"]}', "item1.X-ABLabel:LinkedIn"]
+if cfg.get("adresse"):   v.append(f'ADR;TYPE=WORK:;;{cfg["adresse"]};;;;')
+v.append("END:VCARD")
 pathlib.Path("contact.vcf").write_text("\r\n".join(v) + "\r\n", encoding="utf-8")
 
 print(f'✓ qr.svg ({n}×{n} modules) → {cfg["urlCarte"]}')

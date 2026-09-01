@@ -1,13 +1,22 @@
 {
-  "name": "Prénom Nom — Carte de visite",
-  "short_name": "Prénom Nom",
+  "name": "Romain Legresy — Inqom",
+  "short_name": "R. Legresy",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#08080a",
-  "theme_color": "#08080a",
+  "background_color": "#1E0921",
+  "theme_color": "#1E0921",
   "start_url": "./",
   "icons": [
-    { "src": "icon-180.png", "sizes": "180x180", "type": "image/png" },
-    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+    {
+      "src": "icon-180.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
   ]
 }

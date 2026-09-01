@@ -3,51 +3,71 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
-<title>Prénom Nom — Carte</title>
+<title>Romain Legresy — Inqom</title>
 
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Prénom Nom">
-<meta name="theme-color" content="#08080a">
+<meta name="apple-mobile-web-app-title" content="Romain Legresy">
+<meta name="theme-color" content="#1E0921">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="manifest" href="manifest.webmanifest">
 
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
 <style>
-  /* ===================== Jetons ===================== */
+  /* ⚠️ POLICE DE MARQUE — Matter VF n'est pas embarquée ici (licence).
+     Dès que le .woff2 est disponible, le déposer dans assets/ et décommenter :
+     le reste bascule tout seul, --police la place en tête de pile.
+
+  @font-face{
+    font-family:'Matter VF';
+    src:url('assets/MatterVF.woff2') format('woff2-variations');
+    font-weight:400 600; font-display:swap;
+  }
+  */
+
+  /* ===================== Charte Inqom ===================== */
   :root{
-    --encre:#08080a;
-    --carte:#141418;
-    --carte-haut:#20202a;
-    --texte:#f4f4f6;
-    --attenue:#8b8b96;
-    --filet:rgba(255,255,255,.13);
-    --rayon:10px;        /* 0 pour des angles vifs */
+    --aubergine:#2A0F2E;      /* signature — fond recto */
+    --raisin:#1E0921;         /* structure — fond de page */
+    --bloom-vif:#B28FE0;      /* accent — intitulé de poste */
+    --lilas:#A381CC;          /* fond verso */
+    --blanc:#FFFFFF;
 
-    /* ▼ LE réglage de l'effet lumineux.
-         .5 = très discret · 1 = équilibré · 1.6 = marqué */
-    --intensite:1.2;
+    --police:'Matter VF','Matter','Inter',-apple-system,BlinkMacSystemFont,
+             'Helvetica Neue',Arial,sans-serif;
 
-    --mx:0; --my:0;      /* position de la lumière, -1..1 */
+    /* Zéro arrondi : convention Inqom, alignée sur la newsletter et le deck. */
+    --rayon:0px;
+
+    /* Largeur de la carte. Tout le reste en dérive. */
+    --u:min(78vw, 340px, calc(62vh * 0.6474));
+
+    /* Intensité du reflet lumineux. 0 = aucun · .55 = par défaut · 1.2 = marqué */
+    --intensite:.55;
+
+    --mx:0; --my:0;
   }
 
   *{margin:0;padding:0;box-sizing:border-box}
   html,body{height:100%}
   body{
-    background:var(--encre); color:var(--texte);
-    font:400 16px/1.4 -apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",sans-serif;
+    background:var(--raisin); color:var(--blanc);
+    font:400 16px/1.4 var(--police);
     -webkit-font-smoothing:antialiased;
     display:flex; flex-direction:column; align-items:center; justify-content:center;
-    gap:clamp(20px,5vh,40px);
-    padding:calc(env(safe-area-inset-top) + 24px) 24px calc(env(safe-area-inset-bottom) + 24px);
+    gap:clamp(18px,4.5vh,34px);
+    padding:calc(env(safe-area-inset-top) + 20px) 20px calc(env(safe-area-inset-bottom) + 20px);
     overflow:hidden; -webkit-tap-highlight-color:transparent;
   }
-  body::before{                        /* lueur d'ambiance derrière la carte */
+  body::before{
     content:""; position:fixed; inset:-30%;
     background:radial-gradient(circle at calc(50% + var(--mx)*14%) calc(44% + var(--my)*14%),
-               rgba(110,125,255,.13), transparent 56%);
-    pointer-events:none;
-    animation:fondu 1.4s ease-out both;
+               rgba(178,143,224,.07), transparent 52%);
+    pointer-events:none; animation:fondu 1.4s ease-out both;
   }
 
   /* ===================== Entrée ===================== */
@@ -56,120 +76,128 @@
     from{opacity:0; transform:translateY(22px) scale(.955) rotateX(-10deg)}
     to  {opacity:1; transform:none}
   }
-  @keyframes monte{
-    from{opacity:0; transform:translateY(11px)}
-    to  {opacity:1; transform:none}
+  @keyframes monte{from{opacity:0; transform:translateY(11px)} to{opacity:1; transform:none}}
+  @keyframes balayage{
+    0%{transform:translateX(-160%) skewX(-14deg); opacity:0}
+    22%{opacity:.7} 78%{opacity:.7}
+    100%{transform:translateX(210%) skewX(-14deg); opacity:0}
   }
-  @keyframes balayage{               /* un unique trait de lumière révèle la carte */
-    0%  {transform:translateX(-160%) skewX(-14deg); opacity:0}
-    22% {opacity:.85}
-    78% {opacity:.85}
-    100%{transform:translateX(210%)  skewX(-14deg); opacity:0}
-  }
-
   .entree{animation:entree 1s cubic-bezier(.16,1,.3,1) both; transform-style:preserve-3d}
 
   /* ===================== Carte ===================== */
   .scene{perspective:1500px; perspective-origin:50% 45%}
   .inclinaison{
     transform:rotateY(calc(var(--mx) * 7deg)) rotateX(calc(var(--my) * -7deg));
-    transition:transform .5s cubic-bezier(.22,1,.3,1);
-    transform-style:preserve-3d;
+    transition:transform .5s cubic-bezier(.22,1,.3,1); transform-style:preserve-3d;
   }
   .pivot{
-    position:relative; width:min(78vw,340px); aspect-ratio:55/85;
+    position:relative; width:var(--u); aspect-ratio:650/1004;   /* format du fichier Figma */
     transform-style:preserve-3d; cursor:pointer;
     transition:transform .8s cubic-bezier(.2,.85,.2,1);
   }
   .pivot.retournee{transform:rotateY(180deg)}
 
   .face{
-    position:absolute; inset:0; overflow:hidden;
-    border-radius:var(--rayon);
+    position:absolute; inset:0; overflow:hidden; border-radius:var(--rayon);
     -webkit-backface-visibility:hidden; backface-visibility:hidden;
-    background:linear-gradient(157deg,var(--carte-haut),var(--carte) 58%);
-    box-shadow:
-      0 1px 0 rgba(255,255,255,.1) inset,
-      0 20px 55px -14px rgba(0,0,0,.9),
-      0 2px 8px rgba(0,0,0,.55);
+    box-shadow:0 20px 55px -14px rgba(0,0,0,.75), 0 2px 8px rgba(0,0,0,.4);
   }
-  .face.verso{transform:rotateY(180deg)}
+  .recto{background:var(--aubergine)}
+  .verso{background:var(--lilas); transform:rotateY(180deg)}
 
-  /* ---------- Lumière : un halo, pas des rayures ---------- */
-  .halo,.iris{position:absolute; inset:0; pointer-events:none; z-index:0; will-change:background}
+  /* Forme de fond — position et rotation reprises telles quelles du fichier Figma */
+  /* Spark Inqom agrandi en motif de fond.
+     Placement obtenu par ajustement numérique contre le rendu Figma
+     (erreur moyenne : recto 2,6/255 · verso 5,3/255) — les unités hypot()
+     du code Figma ne se transposent pas directement. */
+  .forme{position:absolute; pointer-events:none; transform:translate(-50%,-50%) rotate(-102deg)}
+  .recto .forme{width:152.769%; height:92.639%; left:50.308%; top:35.857%}
+  .verso .forme{width:155.846%; height:94.505%; left:46.154%; top:31.175%}
+  .forme img{width:100%; height:100%; display:block}
+
+  /* ---------- Lumière (voir README pour le principe) ---------- */
+  .halo,.iris{position:absolute; inset:0; pointer-events:none; z-index:1; will-change:background}
   .halo{
-    /* La source est volontairement projetée HORS de la carte (facteur 78%) :
-       on n'en voit que la retombée, donc un éclairage rasant et non un spot.
-       Un rond centré, quel que soit son réglage, lit toujours comme une tache. */
     background:radial-gradient(66% 50% at calc(50% + var(--mx)*78%) calc(50% + var(--my)*78%),
       rgba(255,255,255,calc(.20 * var(--intensite))) 0%,
-      rgba(255,255,255,calc(.065 * var(--intensite))) 30%,
-      transparent 64%);
+      rgba(255,255,255,calc(.065 * var(--intensite))) 30%, transparent 64%);
     transition:background .45s cubic-bezier(.22,1,.3,1);
   }
-  /* deux teintes légèrement décalées : irisation prismatique, sans motif */
   .iris{
-    /* Deux sources décalées de part et d'autre : la retombée chaude et la
-       froide se croisent sur la carte, ce qui donne l'irisation. */
     background:
       radial-gradient(58% 44% at calc(50% + var(--mx)*95%) calc(50% + var(--my)*62%),
-        rgba(255,105,200,calc(.22 * var(--intensite))), transparent 62%),
+        rgba(255,105,200,calc(.20 * var(--intensite))), transparent 62%),
       radial-gradient(58% 44% at calc(50% + var(--mx)*60%) calc(50% + var(--my)*95%),
-        rgba(95,210,255,calc(.22 * var(--intensite))), transparent 62%);
+        rgba(150,210,255,calc(.20 * var(--intensite))), transparent 62%);
     mix-blend-mode:screen;
     transition:background .45s cubic-bezier(.22,1,.3,1);
   }
   .balayage{
-    position:absolute; top:-25%; bottom:-25%; left:0; width:38%;
-    background:linear-gradient(90deg,transparent,rgba(255,255,255,.20),transparent);
-    pointer-events:none; z-index:1;
-    animation:balayage 1.6s cubic-bezier(.4,0,.3,1) .45s both;
+    position:absolute; top:-25%; bottom:-25%; left:0; width:38%; z-index:2;
+    background:linear-gradient(90deg,transparent,rgba(255,255,255,.18),transparent);
+    pointer-events:none; animation:balayage 1.6s cubic-bezier(.4,0,.3,1) .45s both;
   }
 
-  /* ---------- Contenu, toujours au-dessus de la lumière ---------- */
-  .contenu{
-    position:relative; z-index:2; height:100%;
-    padding:clamp(24px,7%,32px);
-    display:flex; flex-direction:column;
-  }
-  .marque{font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:var(--attenue)}
-  .identite{margin-top:auto}
-  .identite h1{font-size:clamp(28px,8.4vw,36px); line-height:1.02; font-weight:600; letter-spacing:-.025em}
-  .identite h1 span{display:block; font-weight:300; color:var(--attenue)}
-  .identite p{
-    margin-top:14px; padding-top:14px; border-top:1px solid var(--filet);
-    font-size:13px; color:var(--attenue);
-  }
-  .coordonnees{margin-top:20px; display:flex; flex-direction:column; gap:5px; font-size:12.5px; color:var(--attenue)}
-  .coordonnees a{color:inherit; text-decoration:none}
+  /* ---------- Recto ---------- */
+  .recto > :not(.forme):not(.halo):not(.iris):not(.balayage){position:absolute; z-index:3}
 
-  /* apparition échelonnée du contenu du recto */
-  .recto .marque     {animation:monte .8s cubic-bezier(.16,1,.3,1) .30s both}
-  .recto .identite   {animation:monte .8s cubic-bezier(.16,1,.3,1) .42s both}
-  .recto .coordonnees{animation:monte .8s cubic-bezier(.16,1,.3,1) .54s both}
+  .photo{
+    left:13.077%; top:11.255%; width:34.615%; aspect-ratio:225/254;
+    overflow:hidden; animation:monte .8s cubic-bezier(.16,1,.3,1) .30s both;
+  }
+  /* Recadrage repris du fill Figma (l'image est zoomée puis décalée) */
+  .photo img{position:absolute; width:142.22%; height:125.98%; left:-24.24%; top:.18%}
 
-  .verso .contenu{align-items:center; justify-content:center; gap:20px}
-  .cadre-qr{background:#fff; padding:14px; border-radius:6px; line-height:0}
-  .cadre-qr img{width:min(42vw,158px); height:auto; display:block}
-  .verso .contenu p{font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--attenue)}
+  .identite{
+    left:13.077%; top:45.02%; font-size:calc(var(--u) * .0738); font-weight:500;
+    line-height:1.2; letter-spacing:-.015em;
+    animation:monte .8s cubic-bezier(.16,1,.3,1) .42s both;
+  }
+  .identite .poste{color:var(--bloom-vif)}
+
+  .coordonnees{
+    left:13.077%; top:67.43%; font-size:calc(var(--u) * .0492); font-weight:400;
+    line-height:1.32; display:flex; flex-direction:column;
+    animation:monte .8s cubic-bezier(.16,1,.3,1) .54s both;
+  }
+  .coordonnees a{color:var(--blanc); text-decoration:none}
+
+  .logo{
+    left:13.077%; top:86.85%; width:29.077%;
+    animation:monte .8s cubic-bezier(.16,1,.3,1) .66s both;
+  }
+  .logo img{width:100%; height:auto; display:block}
+
+  /* ---------- Verso ---------- */
+  .verso > :not(.forme):not(.halo):not(.iris){position:absolute; z-index:3}
+  .cadre-qr{
+    left:16.769%; top:28.586%; width:66.462%; aspect-ratio:1;
+    background:var(--blanc); padding:7%;
+  }
+  .cadre-qr img{width:100%; height:100%; display:block}
+  .scannez{
+    left:0; right:0; top:72.9%; text-align:center;
+    font-size:calc(var(--u) * .0554); font-weight:500;
+    color:var(--aubergine); letter-spacing:-.01em;
+  }
+  .verso .logo{left:50%; top:86.85%; transform:translateX(-50%); animation:none}
 
   /* ===================== Actions ===================== */
   .actions{
-    display:flex; flex-direction:column; align-items:center; gap:14px; z-index:1;
-    animation:monte .8s cubic-bezier(.16,1,.3,1) .7s both;
+    display:flex; flex-direction:column; align-items:center; gap:12px; z-index:1;
+    animation:monte .8s cubic-bezier(.16,1,.3,1) .78s both;
   }
   .bouton{
-    display:inline-block; padding:14px 26px;
-    background:var(--texte); color:var(--encre);
-    font-size:14px; font-weight:590; letter-spacing:-.01em;
-    text-decoration:none; border-radius:100px;
-    transition:transform .15s ease, opacity .15s ease;
+    display:inline-block; padding:14px 28px; border-radius:var(--rayon);
+    background:var(--blanc); color:var(--aubergine);
+    font-family:var(--police); font-size:14px; font-weight:500; letter-spacing:-.01em;
+    text-decoration:none; transition:opacity .15s ease, transform .15s ease;
   }
-  .bouton:active{transform:scale(.97); opacity:.9}
-  .indice{font-size:12px; color:var(--attenue); text-align:center}
+  .bouton:active{transform:scale(.98); opacity:.9}
+  .indice{font-size:12px; color:rgba(255,255,255,.5); text-align:center}
 
   @media (prefers-reduced-motion:reduce){
-    .entree,.recto .marque,.recto .identite,.recto .coordonnees,.actions,body::before{animation:none}
+    .entree,.photo,.identite,.coordonnees,.logo,.actions,body::before{animation:none}
     .balayage{display:none}
     .inclinaison,.pivot,.halo,.iris{transition:none}
   }
@@ -183,26 +211,28 @@
         <div class="pivot" id="carte" role="button" tabindex="0" aria-label="Retourner la carte">
 
           <div class="face recto">
+            <div class="forme"><img src="assets/forme.svg" alt=""></div>
             <div class="halo"></div><div class="iris"></div><div class="balayage"></div>
-            <div class="contenu">
-              <div class="marque">Société</div>
-              <div class="identite">
-                <h1>Prénom<span>Nom</span></h1>
-                <p>Directeur artistique</p>
-              </div>
-              <div class="coordonnees">
-                <a href="mailto:prenom.nom@societe.com">prenom.nom@societe.com</a>
-                <a href="tel:+33600000000">+33 6 00 00 00 00</a>
-              </div>
+
+            <div class="photo"><img src="assets/photo-romain.png" alt="Romain Legresy"></div>
+            <div class="identite">
+              <div>Romain Legresy</div>
+              <div class="poste">Chief Operations<br>Officer</div>
             </div>
+            <div class="coordonnees">
+              <a href="tel:+33668839000">+33 6 68 83 90 00</a>
+              <a href="mailto:romain.legresy@visma.com">romain.legresy@visma.com</a>
+            </div>
+            <div class="logo"><img src="assets/logo-blanc.svg" alt="Inqom by Visma"></div>
           </div>
 
           <div class="face verso">
+            <div class="forme"><img src="assets/forme.svg" alt=""></div>
             <div class="halo"></div><div class="iris"></div>
-            <div class="contenu">
-              <div class="cadre-qr"><img src="qr.svg" alt="QR code vers la carte"></div>
-              <p>Scannez-moi</p>
-            </div>
+
+            <div class="cadre-qr"><img src="qr.svg" alt="QR code vers la carte"></div>
+            <div class="scannez">Scannez-moi</div>
+            <div class="logo"><img src="assets/logo-sombre.svg" alt="Inqom by Visma"></div>
           </div>
 
         </div>
@@ -221,26 +251,14 @@
   const carte  = document.getElementById('carte');
   const borne  = (v,a,b) => Math.min(b, Math.max(a, v));
 
-  let cible  = { x:0, y:0 };
-  let actuel = { x:0, y:0 };
-  let doigt  = false;
-  let relache = 0;
+  let cible = {x:0,y:0}, actuel = {x:0,y:0}, doigt = false, relache = 0;
 
-  const applique = () => {
-    racine.style.setProperty('--mx', actuel.x.toFixed(3));
-    racine.style.setProperty('--my', actuel.y.toFixed(3));
-  };
-
-  /* Dérive autonome : la lumière vit sa vie, sans capteur ni permission.
-     Deux périodes premières entre elles -> le motif ne se répète jamais à l'œil. */
   const depart = performance.now();
   (function boucle(t){
     if (!doigt && t - relache > 900) {
       const s = (t - depart) / 1000;
-      /* Orbite en phase unique : sin et cos ne s'annulent jamais ensemble,
-         donc la source ne passe JAMAIS près du centre — c'est là que le halo
-         redevient une tache. Le rayon respire lentement pour éviter la boucle
-         mécanique perceptible. */
+      /* Orbite à phase unique : la source ne passe jamais près du centre,
+         où un halo cesse de lire comme de la lumière. */
       const a = s / 7.5 + .8;
       const r = .86 + Math.sin(s / 11.3) * .14;
       cible.x = Math.sin(a) * .78 * r;
@@ -248,26 +266,25 @@
     }
     actuel.x += (cible.x - actuel.x) * .05;
     actuel.y += (cible.y - actuel.y) * .05;
-    applique();
+    racine.style.setProperty('--mx', actuel.x.toFixed(3));
+    racine.style.setProperty('--my', actuel.y.toFixed(3));
     requestAnimationFrame(boucle);
   })(depart);
 
-  /* La lumière suit le doigt tant qu'il est sur la carte. */
   const suivre = (cx, cy) => {
     const r = carte.getBoundingClientRect();
     cible.x = borne(((cx - r.left) / r.width  - .5) * 2, -1, 1);
     cible.y = borne(((cy - r.top ) / r.height - .5) * 2, -1, 1);
   };
   carte.addEventListener('touchstart', e => { doigt = true; suivre(e.touches[0].clientX, e.touches[0].clientY); }, {passive:true});
-  carte.addEventListener('touchmove',  e => { suivre(e.touches[0].clientX, e.touches[0].clientY); }, {passive:true});
+  carte.addEventListener('touchmove',  e => suivre(e.touches[0].clientX, e.touches[0].clientY), {passive:true});
   carte.addEventListener('touchend',   () => { doigt = false; relache = performance.now(); }, {passive:true});
   window.addEventListener('pointermove', e => {
     if (e.pointerType !== 'mouse') return;
-    relache = performance.now();          // suspend la dérive le temps du survol
+    relache = performance.now();
     suivre(e.clientX, e.clientY);
   }, {passive:true});
 
-  /* Retournement */
   const retourner = () => carte.classList.toggle('retournee');
   carte.addEventListener('click', retourner);
   carte.addEventListener('keydown', e => {

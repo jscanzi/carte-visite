@@ -1,12 +1,12 @@
 {
-  "prenom": "Prénom",
-  "nom": "Nom",
-  "poste": "Directeur artistique",
-  "societe": "Société",
-  "telephone": "+33600000000",
-  "email": "prenom.nom@societe.com",
-  "site": "https://societe.com",
-  "linkedin": "https://www.linkedin.com/in/placeholder",
-  "adresse": "Paris, France",
+  "prenom": "Romain",
+  "nom": "Legresy",
+  "poste": "Chief Operations Officer",
+  "societe": "Inqom",
+  "telephone": "+33668839000",
+  "email": "romain.legresy@visma.com",
+  "site": "https://www.inqom.com",
+  "linkedin": "",
+  "adresse": "",
   "urlCarte": "https://jscanzi.github.io/carte-visite/"
 }
