@@ -54,14 +54,12 @@ la carte n'emploie aucune italique.
 explicitement d'altérer, convertir ou modifier les fichiers. Displaay fournit
 déjà le WOFF2, il n'y a donc rien à convertir.
 
-⚠️ **La police n'est pas versionnée** (voir `.gitignore`). Tant que ce dépôt est
-public, y committer le fichier reviendrait à le mettre à disposition de tous,
-ce que la licence ne couvre pas : elle autorise l'hébergement en `@font-face`
-sur le site, pas la diffusion du fichier dans un dépôt de sources ouvert.
-Il faut donc déposer `MatterUprightsVF.woff2` dans `assets/` à la main, ou
-passer le dépôt en privé avant de le versionner.
-
-Sans ce fichier, la page se rabat silencieusement sur la police système.
+⚠️ **La police est versionnée dans ce dépôt public, à titre temporaire**
+(décision de Jonathan, 01/09/2026, pour les tests). La licence Web couvre
+l'hébergement en `@font-face` sur le site, pas la diffusion du fichier dans un
+dépôt de sources ouvert. **À retirer avant toute diffusion** — et attention,
+supprimer le fichier ne l'efface pas de l'historique Git : il faudra réécrire
+l'historique ou repartir d'un dépôt neuf.
 
 ## Modifier le contenu
 
@@ -176,3 +174,16 @@ par CSS à l'exécution — c'était le plus gros coût pendant la rotation.
 La source reste dans `sources/` pour pouvoir régénérer.
 
 ℹ️ Aucune requête externe : ni Google Fonts, ni CDN.
+
+## Modes de diagnostic
+
+| URL | Effet |
+|---|---|
+| `?perf` | Mesure le temps réel des frames pendant un retournement : nombre de frames, médiane, pire, et combien dépassent 32 ms. À lire sur le vrai appareil. |
+| `?sanslumiere` | Retire halo et irisations, et coupe leur boucle. Permet de comparer A/B et de savoir si la lumière coûte vraiment. |
+
+Les deux se combinent : `?perf&sanslumiere`.
+
+ℹ️ **Le halo est un ajout, pas une exigence du design.** Le fichier Figma
+d'origine n'a aucun effet lumineux. S'il coûte trop cher sur mobile, le retirer
+ne trahit pas la maquette — au contraire.

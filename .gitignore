@@ -3,11 +3,6 @@
 node_modules/
 __pycache__/
 
-# Police sous licence Displaay — voir README, section Police de marque.
-# Ne PAS committer tant que le dépôt est public : la licence Web autorise
-# l'auto-hébergement en @font-face, pas la mise à disposition du fichier
-# dans un dépôt de sources ouvert.
-assets/*.woff2
-assets/*.woff
-assets/*.ttf
-assets/*.otf
+# ⚠️ Police sous licence Displaay versionnée à la demande de Jonathan,
+# pour le test uniquement (01/09/2026). À retirer avant toute diffusion —
+# et se souvenir qu'une suppression ne l'efface pas de l'historique Git.
