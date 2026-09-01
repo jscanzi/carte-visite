@@ -17,6 +17,21 @@ et verso (337:127), 650 × 1004.
 | Fond verso | `#A381CC` | lilas |
 | Angles | `0` | **tout en sharp**, convention maison |
 
+⚠️ **Trois précautions rendent le retournement fiable sur Safari iOS.** Sans
+elles, les deux faces se superposent (la face arrière apparaît en miroir) :
+
+1. `.entree` anime l'**opacité** ; elle est donc placée **hors** du contexte 3D
+   (à l'extérieur de `.scene`) et porte sa propre `perspective()` dans la
+   fonction `transform`. L'opacité est une propriété de groupage : sur un
+   ancêtre en `preserve-3d`, elle aplatit le contexte.
+2. Le rognage et le `mix-blend-mode` vivent dans `.plan` (`isolation:isolate`),
+   pas sur `.face` : `overflow:hidden` et les fondus sur une face en
+   `backface-visibility` cassent le rendu 3D de Safari.
+3. Au repos, **une seule face est rendue** (`opacity`), les deux uniquement
+   pendant la rotation via la classe `.enrotation` posée par le JS. Ce filet
+   ne dépend d'aucun calage temporel. Si tu changes la durée de la transition
+   de `.pivot`, mets `DUREE_ROTATION` à la même valeur.
+
 ⚠️ **Le contenu de la carte porte ses couleurs explicitement**, il n'hérite pas
 de `body` : le fond d'écran est clair, l'héritage rendrait le nom sombre sur
 sombre. Ne pas retirer les `color:` de `.identite` et `.coordonnees`.

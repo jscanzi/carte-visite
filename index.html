@@ -67,8 +67,8 @@
 
   /* ===================== Entrée ===================== */
   @keyframes entree{
-    from{opacity:0; transform:translateY(22px) scale(.955) rotateX(-10deg)}
-    to  {opacity:1; transform:none}
+    from{opacity:0; transform:perspective(1200px) translateY(22px) scale(.955) rotateX(-10deg)}
+    to  {opacity:1; transform:perspective(1200px) translateY(0)    scale(1)    rotateX(0deg)}
   }
   @keyframes monte{from{opacity:0; transform:translateY(11px)} to{opacity:1; transform:none}}
   @keyframes balayage{
@@ -76,7 +76,9 @@
     22%{opacity:.7} 78%{opacity:.7}
     100%{transform:translateX(210%) skewX(-14deg); opacity:0}
   }
-  .entree{animation:entree 1s cubic-bezier(.16,1,.3,1) both; transform-style:preserve-3d}
+  /* Pas de preserve-3d ici : ce bloc anime l'opacité, il doit rester
+     HORS du contexte 3D de la carte (voir CAUSE 1 en commentaire du HTML). */
+  .entree{animation:entree 1s cubic-bezier(.16,1,.3,1) both}
 
   /* ===================== Carte ===================== */
   .scene{perspective:1500px; perspective-origin:50% 45%}
@@ -87,17 +89,31 @@
   .pivot{
     position:relative; width:var(--u); aspect-ratio:650/1004;   /* format du fichier Figma */
     transform-style:preserve-3d; cursor:pointer;
-    transition:transform .8s cubic-bezier(.2,.85,.2,1);
+    transition:transform .8s cubic-bezier(.65,0,.35,1);
   }
   .pivot.retournee{transform:rotateY(180deg)}
 
   .face{
-    position:absolute; inset:0; overflow:hidden; border-radius:var(--rayon);
+    position:absolute; inset:0; border-radius:var(--rayon);
     -webkit-backface-visibility:hidden; backface-visibility:hidden;
     box-shadow:0 26px 60px -18px rgba(42,15,46,.42), 0 4px 14px rgba(42,15,46,.14);
   }
-  .recto{background:var(--aubergine)}
-  .verso{background:var(--lilas); transform:rotateY(180deg)}
+  /* Sécurité indépendante du temps : au repos, une seule face est rendue.
+     Si Safari ignore backface-visibility, la face arrière ne peut donc pas
+     transparaître à l'arrêt — c'est le défaut constaté sur iPhone.
+     Pendant la rotation seulement, les deux sont rendues (règle .enrotation
+     plus bas), sinon l'illusion 3D est cassée. Aucune transition ici :
+     le calage sur un instant précis du mouvement serait fragile. */
+  .recto{background:var(--aubergine); opacity:1}
+  .pivot.retournee .recto{opacity:0}
+  .pivot.retournee .verso{opacity:1}
+
+  /* Calque de décor : c'est LUI qui rogne et qui isole le fondu,
+     pas la face — sinon Safari casse le backface-visibility. */
+  .plan{position:absolute; inset:0; overflow:hidden; isolation:isolate; z-index:0}
+  .verso{background:var(--lilas); transform:rotateY(180deg); opacity:0}
+  /* Doit rester APRÈS les règles .retournee : même spécificité, le dernier gagne. */
+  .pivot.enrotation .face{opacity:1}
 
   /* Forme de fond — position et rotation reprises telles quelles du fichier Figma */
   /* Spark Inqom agrandi en motif de fond.
@@ -133,7 +149,7 @@
   }
 
   /* ---------- Recto ---------- */
-  .recto > :not(.forme):not(.halo):not(.iris):not(.balayage){position:absolute; z-index:3}
+  .recto > :not(.plan){position:absolute; z-index:3}
 
   .photo{
     left:13.077%; top:11.255%; width:34.615%; aspect-ratio:225/254;
@@ -156,7 +172,6 @@
     line-height:1.32; display:flex; flex-direction:column;
     animation:monte .8s cubic-bezier(.16,1,.3,1) .54s both;
   }
-  .coordonnees a{color:var(--blanc); text-decoration:none}
 
   .logo{
     left:13.077%; top:86.85%; width:29.077%;
@@ -165,7 +180,7 @@
   .logo img{width:100%; height:auto; display:block}
 
   /* ---------- Verso ---------- */
-  .verso > :not(.forme):not(.halo):not(.iris){position:absolute; z-index:3}
+  .verso > :not(.plan){position:absolute; z-index:3}
   .cadre-qr{
     left:16.769%; top:28.586%; width:66.462%; aspect-ratio:1;
     background:var(--blanc); padding:7%;
@@ -201,14 +216,18 @@
 </head>
 <body>
 
-  <div class="scene">
-    <div class="entree">
+  <!-- .entree est À L'EXTÉRIEUR de .scene : elle anime l'opacité, ce qui
+       aplatirait le contexte 3D et ferait réapparaître la face arrière. -->
+  <div class="entree">
+    <div class="scene">
       <div class="inclinaison">
         <div class="pivot" id="carte" role="button" tabindex="0" aria-label="Retourner la carte">
 
           <div class="face recto">
-            <div class="forme"><img src="assets/forme.svg" alt=""></div>
-            <div class="halo"></div><div class="iris"></div><div class="balayage"></div>
+            <div class="plan">
+              <div class="forme"><img src="assets/forme.svg" alt=""></div>
+              <div class="halo"></div><div class="iris"></div><div class="balayage"></div>
+            </div>
 
             <div class="photo"><img src="assets/photo-romain.png" alt="Romain Legresy"></div>
             <div class="identite">
@@ -216,15 +235,17 @@
               <div class="poste">Chief Operations<br>Officer</div>
             </div>
             <div class="coordonnees">
-              <a href="tel:+33668839000">+33 6 68 83 90 00</a>
-              <a href="mailto:romain.legresy@visma.com">romain.legresy@visma.com</a>
+              <span>+33 6 68 83 90 00</span>
+              <span>romain.legresy@visma.com</span>
             </div>
             <div class="logo"><img src="assets/logo-blanc.svg" alt="Inqom by Visma"></div>
           </div>
 
           <div class="face verso">
-            <div class="forme"><img src="assets/forme.svg" alt=""></div>
-            <div class="halo"></div><div class="iris"></div>
+            <div class="plan">
+              <div class="forme"><img src="assets/forme.svg" alt=""></div>
+              <div class="halo"></div><div class="iris"></div>
+            </div>
 
             <div class="cadre-qr"><img src="qr.svg" alt="QR code vers la carte"></div>
             <div class="scannez">Scannez-moi</div>
@@ -281,7 +302,14 @@
     suivre(e.clientX, e.clientY);
   }, {passive:true});
 
-  const retourner = () => carte.classList.toggle('retournee');
+  const DUREE_ROTATION = 800;   // doit rester égal à la transition de .pivot
+  let finRotation = null;
+  const retourner = () => {
+    carte.classList.add('enrotation');          // les deux faces le temps du mouvement
+    carte.classList.toggle('retournee');
+    clearTimeout(finRotation);
+    finRotation = setTimeout(() => carte.classList.remove('enrotation'), DUREE_ROTATION);
+  };
   carte.addEventListener('click', retourner);
   carte.addEventListener('keydown', e => {
     if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); retourner(); }
