@@ -2,3 +2,12 @@
 .vercel
 node_modules/
 __pycache__/
+
+# Police sous licence Displaay — voir README, section Police de marque.
+# Ne PAS committer tant que le dépôt est public : la licence Web autorise
+# l'auto-hébergement en @font-face, pas la mise à disposition du fichier
+# dans un dépôt de sources ouvert.
+assets/*.woff2
+assets/*.woff
+assets/*.ttf
+assets/*.otf

@@ -39,11 +39,29 @@ elles, les deux faces se superposent (la face arrière apparaît en miroir) :
 de `body` : le fond d'écran est clair, l'héritage rendrait le nom sombre sur
 sombre. Ne pas retirer les `color:` de `.identite` et `.coordonnees`.
 
-⚠️ **Police de marque.** Le design est composé en **Matter VF**, qui n'est pas
-embarquée ici faute de licence web. La pile de repli est Inter — le proxy déjà
-retenu dans Figma pour le deck et la newsletter. Dès que le `.woff2` Matter est
-disponible : le déposer dans `assets/` et décommenter le bloc `@font-face` en
-tête du `<style>`. Tout bascule ensuite automatiquement.
+## Police de marque
+
+La carte est composée en **Matter** (Displaay Type Foundry), licence achetée par
+**Inqom** — facture DP15269, usages *Desktop + Print, Social Media, **Web***,
+jusqu'à 250 personnes. L'usage Web autorise nommément l'auto-hébergement via
+`@font-face`, et le partage avec les prestataires du licencié.
+
+Fichier utilisé : `assets/MatterUprightsVF.woff2`, livré tel quel par la
+fonderie. Variante *Uprights* (178 ko) plutôt que la VF complète (260 ko) :
+la carte n'emploie aucune italique.
+
+⚠️ **Ne pas convertir ni sous-ensembler la police.** La licence interdit
+explicitement d'altérer, convertir ou modifier les fichiers. Displaay fournit
+déjà le WOFF2, il n'y a donc rien à convertir.
+
+⚠️ **La police n'est pas versionnée** (voir `.gitignore`). Tant que ce dépôt est
+public, y committer le fichier reviendrait à le mettre à disposition de tous,
+ce que la licence ne couvre pas : elle autorise l'hébergement en `@font-face`
+sur le site, pas la diffusion du fichier dans un dépôt de sources ouvert.
+Il faut donc déposer `MatterUprightsVF.woff2` dans `assets/` à la main, ou
+passer le dépôt en privé avant de le versionner.
+
+Sans ce fichier, la page se rabat silencieusement sur la police système.
 
 ## Modifier le contenu
 
@@ -55,6 +73,7 @@ tête du `<style>`. Tout bascule ensuite automatiquement.
    ```
    python3 build.py         # -> qr.svg + contact.vcf
    python3 build-icones.py  # -> icon-180.png + icon-512.png (spark Inqom)
+   python3 build-photo.py   # -> assets/photo-romain.webp (recadrage Figma)
    ```
    (`segno` et `Pillow` requis : `pip install segno pillow`)
 
@@ -140,3 +159,20 @@ verrouillé, sans application.
 ## Accessibilité
 
 `prefers-reduced-motion` neutralise l'ouverture, le balayage et les transitions.
+
+## Poids de la page
+
+| Élément | Poids |
+|---|---|
+| Police Matter (Uprights VF) | 176 ko |
+| Photo (WebP, recadrée en amont) | 24 ko |
+| Formes de fond (2 WebP) | 20 ko |
+| Logos + QR (SVG) | 32 ko |
+| HTML | ~15 ko |
+
+⚠️ **La photo est recadrée en amont** par `build-photo.py`, aux dimensions
+exactes d'affichage. Elle était en PNG 400×400 de 260 ko, réduite et recadrée
+par CSS à l'exécution — c'était le plus gros coût pendant la rotation.
+La source reste dans `sources/` pour pouvoir régénérer.
+
+ℹ️ Aucune requête externe : ni Google Fonts, ni CDN.

@@ -14,21 +14,20 @@
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="manifest" href="manifest.webmanifest">
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-
 <style>
-  /* ⚠️ POLICE DE MARQUE — Matter VF n'est pas embarquée ici (licence).
-     Dès que le .woff2 est disponible, le déposer dans assets/ et décommenter :
-     le reste bascule tout seul, --police la place en tête de pile.
-
+  /* Matter — police de marque Inqom. Licence Displaay « Web » au nom d'Inqom
+     (facture DP15269), qui autorise l'auto-hébergement en @font-face.
+     Fichier livré tel quel par la fonderie : ne pas convertir ni sous-ensembler,
+     la licence l'interdit explicitement.
+     Variante « Uprights » : pas d'italiques sur la carte, 178 ko au lieu de 260. */
   @font-face{
     font-family:'Matter VF';
-    src:url('assets/MatterVF.woff2') format('woff2-variations');
-    font-weight:400 600; font-display:swap;
+    src:url('assets/MatterUprightsVF.woff2') format('woff2-variations');
+    font-weight:100 1000;
+    font-style:normal;
+    font-display:swap;
   }
-  */
+
 
   /* ===================== Charte Inqom ===================== */
   :root{
@@ -39,7 +38,8 @@
     --lilas:#A381CC;          /* fond verso */
     --blanc:#FFFFFF;
 
-    --police:'Matter VF','Matter','Inter',-apple-system,BlinkMacSystemFont,
+    /* Repli système si Matter n'a pas chargé — plus aucune requête externe. */
+    --police:'Matter VF',-apple-system,BlinkMacSystemFont,'SF Pro Text',
              'Helvetica Neue',Arial,sans-serif;
 
     /* Zéro arrondi : convention Inqom, alignée sur la newsletter et le deck. */
@@ -159,8 +159,9 @@
     left:13.077%; top:11.255%; width:34.615%; aspect-ratio:225/254;
     overflow:hidden; animation:monte .8s cubic-bezier(.16,1,.3,1) .30s both;
   }
-  /* Recadrage repris du fill Figma (l'image est zoomée puis décalée) */
-  .photo img{position:absolute; width:142.22%; height:125.98%; left:-24.24%; top:.18%}
+  /* Le recadrage est appliqué en amont par build-photo.py : le navigateur
+     n'a plus d'image surdimensionnée à réduire pendant la rotation. */
+  .photo img{width:100%; height:100%; object-fit:cover; display:block}
 
   .identite{
     left:13.077%; top:45.02%; color:var(--blanc);
@@ -233,7 +234,7 @@
               <div class="halo"></div><div class="iris chaude"></div><div class="iris froide"></div><div class="balayage"></div>
             </div>
 
-            <div class="photo"><img src="assets/photo-romain.png" alt="Romain Legresy"></div>
+            <div class="photo"><img src="assets/photo-romain.webp" alt="Romain Legresy"></div>
             <div class="identite">
               <div>Romain Legresy</div>
               <div class="poste">Chief Operations<br>Officer</div>
