@@ -112,14 +112,14 @@
   .verso{background:var(--lilas); transform:rotateY(180deg); opacity:0}
 
   /* Forme de fond — position et rotation reprises telles quelles du fichier Figma */
-  /* Spark Inqom agrandi en motif de fond.
-     Placement obtenu par ajustement numérique contre le rendu Figma
-     (erreur moyenne : recto 2,6/255 · verso 5,3/255) — les unités hypot()
-     du code Figma ne se transposent pas directement. */
-  .forme{position:absolute; pointer-events:none; transform:translate(-50%,-50%) rotate(-102deg)}
-  .recto .forme{width:152.769%; height:92.639%; left:50.308%; top:35.857%}
-  .verso .forme{width:155.846%; height:94.505%; left:46.154%; top:31.175%}
-  .forme img{width:100%; height:100%; display:block}
+  /* Fond = rendu Figma du nœud Union (le « spark » agrandi), exporté en 2x.
+     ⚠️ Le SVG exporté par Figma porte un flou gaussien de 25 qui N'EXISTE PAS
+     dans le design : artefact d'export. Il donnait des arêtes molles et
+     coûtait cher à rastériser à chaque frame de rotation. Ne pas y revenir.
+     ⚠️ L'image est OPAQUE, la couleur de fond y est incorporée : si tu changes
+     --aubergine ou --lilas, il faut réexporter depuis Figma.
+     Calage vérifié numériquement : 0,0 · pleine largeur (erreur 0,03/255). */
+  .forme{position:absolute; left:0; top:0; width:100%; height:auto; pointer-events:none}
 
   /* ---------- Lumière (voir README pour le principe) ---------- */
   /* Le dégradé est FIXE ; c'est l'élément (2x la carte) qu'on déplace.
@@ -230,7 +230,7 @@
 
           <div class="face recto">
             <div class="plan">
-              <div class="forme"><img src="assets/forme.svg" alt=""></div>
+              <img class="forme" src="assets/forme-recto.webp" alt="">
               <div class="halo"></div><div class="iris chaude"></div><div class="iris froide"></div><div class="balayage"></div>
             </div>
 
@@ -248,7 +248,7 @@
 
           <div class="face verso">
             <div class="plan">
-              <div class="forme"><img src="assets/forme.svg" alt=""></div>
+              <img class="forme" src="assets/forme-verso.webp" alt="">
               <div class="halo"></div><div class="iris chaude"></div><div class="iris froide"></div>
             </div>
 
@@ -274,6 +274,7 @@
   const borne  = (v,a,b) => Math.min(b, Math.max(a, v));
 
   let cible = {x:0,y:0}, actuel = {x:0,y:0}, doigt = false, relache = 0;
+  let enRotation = false;        // pendant le retournement, on ne touche plus au style
 
   const depart = performance.now();
   (function boucle(t){
@@ -286,10 +287,12 @@
       cible.x = Math.sin(a) * .78 * r;
       cible.y = Math.cos(a) * .62 * r;
     }
-    actuel.x += (cible.x - actuel.x) * .05;
-    actuel.y += (cible.y - actuel.y) * .05;
-    racine.style.setProperty('--mx', actuel.x.toFixed(3));
-    racine.style.setProperty('--my', actuel.y.toFixed(3));
+    if (!enRotation) {           // laisser toute la machine au retournement
+      actuel.x += (cible.x - actuel.x) * .05;
+      actuel.y += (cible.y - actuel.y) * .05;
+      racine.style.setProperty('--mx', actuel.x.toFixed(3));
+      racine.style.setProperty('--my', actuel.y.toFixed(3));
+    }
     requestAnimationFrame(boucle);
   })(depart);
 
@@ -310,6 +313,8 @@
   const DUREE_ROTATION = 700;   // doit rester égal à la transition de .pivot
   let bascule = null;
   const retourner = () => {
+    enRotation = true;
+    setTimeout(() => { enRotation = false; }, DUREE_ROTATION);
     carte.classList.toggle('retournee');                 // lance la rotation
     clearTimeout(bascule);
     // Échange des faces au moment exact du profil. La courbe est symétrique,

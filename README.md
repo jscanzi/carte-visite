@@ -70,11 +70,24 @@ Jetons `:root` en tête du `<style>` :
 
 ## Deux points techniques
 
-**Le motif de fond** est le spark Inqom agrandi (`assets/forme.svg`), avec son
-flou gaussien et son dégradé aubergine → transparent d'origine. Les unités
-`hypot()` du code exporté par Figma ne se transposent pas en CSS : le placement
-a été obtenu par **ajustement numérique** contre le rendu Figma (erreur moyenne
-2,6/255 au recto, 5,3/255 au verso). Ne pas « corriger » ces valeurs à vue.
+**Le motif de fond** est le spark Inqom agrandi. Ce sont les rendus du nœud
+`Union` exportés depuis Figma (`assets/forme-recto.webp`, `forme-verso.webp`),
+posés en haut à gauche, pleine largeur. Calage vérifié numériquement contre le
+rendu de référence : erreur 0,03/255 au recto, 0,04/255 au verso.
+
+⚠️ **Ne pas repasser au SVG.** Le `Union` exporté en SVG porte un
+`feGaussianBlur stdDeviation="25"` **qui n'existe pas dans le design** —
+artefact d'export. Il donnait des arêtes molles au lieu des arêtes franches
+voulues, et rastériser un filtre SVG à chaque frame de rotation coûtait cher.
+`assets/forme.svg` n'est conservé que parce que `build-icones.py` y lit le
+tracé du spark ; il n'est plus affiché.
+
+⚠️ **Ces images sont opaques**, la couleur de fond y est incorporée. Changer
+`--aubergine` ou `--lilas` impose de réexporter depuis Figma.
+
+⚠️ **La lumière est figée pendant le retournement** (`enRotation` dans le JS) :
+inutile de composer un éclairage sur une carte qui tourne, autant laisser la
+machine à la rotation.
 
 ⚠️ **La lumière ne repeint jamais.** Les dégradés sont **fixes** ; ce sont des
 éléments de 2× la taille de la carte qu'on déplace en `translate3d`, composité
