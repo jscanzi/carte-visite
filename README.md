@@ -12,10 +12,14 @@ et verso (337:127), 650 × 1004.
 | Rôle | Valeur | Nom Inqom |
 |---|---|---|
 | Fond recto | `#2A0F2E` | aubergine (signature) |
-| Fond de page | `#1E0921` | raisin (structure) |
+| Fond d'écran | `#FAF8F5` | crème |
 | Intitulé de poste | `#B28FE0` | bloom-vif (accent) |
 | Fond verso | `#A381CC` | lilas |
 | Angles | `0` | **tout en sharp**, convention maison |
+
+⚠️ **Le contenu de la carte porte ses couleurs explicitement**, il n'hérite pas
+de `body` : le fond d'écran est clair, l'héritage rendrait le nom sombre sur
+sombre. Ne pas retirer les `color:` de `.identite` et `.coordonnees`.
 
 ⚠️ **Police de marque.** Le design est composé en **Matter VF**, qui n'est pas
 embarquée ici faute de licence web. La pile de repli est Inter — le proxy déjà

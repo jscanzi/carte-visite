@@ -6,5 +6,7 @@ ORG:Inqom
 TITLE:Chief Operations Officer
 TEL;TYPE=CELL,VOICE:+33668839000
 EMAIL;TYPE=INTERNET,WORK:romain.legresy@visma.com
-URL:https://www.inqom.com
+URL:https://www.inqom.com/
+item1.URL:https://www.linkedin.com/in/romainlegresy/
+item1.X-ABLabel:LinkedIn
 END:VCARD

@@ -3,8 +3,8 @@
   "short_name": "R. Legresy",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#1E0921",
-  "theme_color": "#1E0921",
+  "background_color": "#FAF8F5",
+  "theme_color": "#FAF8F5",
   "start_url": "./",
   "icons": [
     {
