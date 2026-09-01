@@ -2,6 +2,11 @@
 
 Transposition web de la carte de visite Inqom. Ajoutable à l'écran d'accueil
 iOS, retournement 3D vers le QR, vCard native, animation d'ouverture.
+
+ℹ️ **Aucun effet lumineux.** Un halo animé et une inclinaison au doigt ont
+existé puis ont été retirés (01/09/2026) : ils coûtaient cher sur mobile et
+n'existaient pas dans le fichier Figma. La carte est immobile jusqu'au tap.
+Ne pas les réintroduire sans mesurer — voir `?perf`.
 Aucun compte développeur, aucun abonnement, aucune permission demandée.
 
 Source du design : fichier Figma `Carte_Visite_Inqom`, frames `Recto` (337:77)
@@ -81,7 +86,6 @@ Jetons `:root` en tête du `<style>` :
 
 | Jeton | Rôle |
 |---|---|
-| `--intensite` | Force du reflet lumineux. `0` = aucun · `.55` par défaut · `1.2` marqué |
 | `--rayon` | Angles. Reste à `0` : convention Inqom |
 | `--u` | Largeur de la carte, tout le reste en dérive |
 
@@ -102,30 +106,8 @@ tracé du spark ; il n'est plus affiché.
 ⚠️ **Ces images sont opaques**, la couleur de fond y est incorporée. Changer
 `--aubergine` ou `--lilas` impose de réexporter depuis Figma.
 
-ℹ️ **Pas de `mix-blend-mode`** sur les calques d'irisation : il forçait le
-compositeur à relire le fond à chaque frame. Conséquence assumée — sur le fond
-clair du verso, la teinte froide vire au bleu au lieu d'éclaircir. Si ce bleu
-gêne, remplacer les couleurs de `.iris.chaude` / `.iris.froide` par des valeurs
-de la palette (bloom `#EBC5F2`, bloom-vif `#B28FE0`) plutôt que de remettre le
-blend. Sur le recto sombre, l'écart est imperceptible.
-
-⚠️ **La lumière est figée pendant le retournement** (`enRotation` dans le JS) :
-inutile de composer un éclairage sur une carte qui tourne, autant laisser la
-machine à la rotation.
-
-⚠️ **La lumière ne repeint jamais.** Les dégradés sont **fixes** ; ce sont des
-éléments de 2× la taille de la carte qu'on déplace en `translate3d`, composité
-par le GPU. Animer la position d'un dégradé (première version) forçait un
-repaint complet à chaque frame sur quatre éléments : c'était la cause de la
-latence sur mobile. Ne pas revenir à un `background-position` animé.
-
 ⚠️ **`format-detection` est obligatoire.** Sans lui, iOS détecte le numéro de
 téléphone et le transforme en lien bleu souligné, même sans balise `<a>`.
-
-**La lumière** est un éclairage rasant : la source est projetée hors de la carte,
-on n'en voit que la retombée. Elle suit une orbite à phase unique qui ne passe
-jamais près du centre — c'est au centre qu'un halo cesse de lire comme de la
-lumière et devient une tache. Elle dérive seule et suit le doigt au toucher.
 
 Pas de gyroscope : il exige une permission **et** un réglage système
 (Réglages → Safari → Accès au mouvement) désactivable côté destinataire, sans
@@ -180,10 +162,4 @@ La source reste dans `sources/` pour pouvoir régénérer.
 | URL | Effet |
 |---|---|
 | `?perf` | Mesure le temps réel des frames pendant un retournement : nombre de frames, médiane, pire, et combien dépassent 32 ms. À lire sur le vrai appareil. |
-| `?sanslumiere` | Retire halo et irisations, et coupe leur boucle. Permet de comparer A/B et de savoir si la lumière coûte vraiment. |
 
-Les deux se combinent : `?perf&sanslumiere`.
-
-ℹ️ **Le halo est un ajout, pas une exigence du design.** Le fichier Figma
-d'origine n'a aucun effet lumineux. S'il coûte trop cher sur mobile, le retirer
-ne trahit pas la maquette — au contraire.
