@@ -2,6 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
+<meta name="format-detection" content="telephone=no,date=no,address=no,email=no">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <title>Romain Legresy — Inqom</title>
 
@@ -89,7 +90,7 @@
   .pivot{
     position:relative; width:var(--u); aspect-ratio:650/1004;   /* format du fichier Figma */
     transform-style:preserve-3d; cursor:pointer;
-    transition:transform .8s cubic-bezier(.65,0,.35,1);
+    transition:transform .7s cubic-bezier(.65,0,.35,1);
   }
   .pivot.retournee{transform:rotateY(180deg)}
 
@@ -98,22 +99,17 @@
     -webkit-backface-visibility:hidden; backface-visibility:hidden;
     box-shadow:0 26px 60px -18px rgba(42,15,46,.42), 0 4px 14px rgba(42,15,46,.14);
   }
-  /* Sécurité indépendante du temps : au repos, une seule face est rendue.
-     Si Safari ignore backface-visibility, la face arrière ne peut donc pas
-     transparaître à l'arrêt — c'est le défaut constaté sur iPhone.
-     Pendant la rotation seulement, les deux sont rendues (règle .enrotation
-     plus bas), sinon l'illusion 3D est cassée. Aucune transition ici :
-     le calage sur un instant précis du mouvement serait fragile. */
+  /* backface-visibility n'est pas fiable sur Safari iOS : on ne s'y fie plus.
+     UNE SEULE face est rendue à tout instant. L'échange se fait à mi-rotation,
+     quand la carte est de profil (largeur nulle) — donc invisible. */
   .recto{background:var(--aubergine); opacity:1}
-  .pivot.retournee .recto{opacity:0}
-  .pivot.retournee .verso{opacity:1}
+  .pivot.montreVerso .recto{opacity:0}
+  .pivot.montreVerso .verso{opacity:1}
 
   /* Calque de décor : c'est LUI qui rogne et qui isole le fondu,
      pas la face — sinon Safari casse le backface-visibility. */
   .plan{position:absolute; inset:0; overflow:hidden; isolation:isolate; z-index:0}
   .verso{background:var(--lilas); transform:rotateY(180deg); opacity:0}
-  /* Doit rester APRÈS les règles .retournee : même spécificité, le dernier gagne. */
-  .pivot.enrotation .face{opacity:1}
 
   /* Forme de fond — position et rotation reprises telles quelles du fichier Figma */
   /* Spark Inqom agrandi en motif de fond.
@@ -126,21 +122,30 @@
   .forme img{width:100%; height:100%; display:block}
 
   /* ---------- Lumière (voir README pour le principe) ---------- */
-  .halo,.iris{position:absolute; inset:0; pointer-events:none; z-index:1; will-change:background}
-  .halo{
-    background:radial-gradient(66% 50% at calc(50% + var(--mx)*78%) calc(50% + var(--my)*78%),
-      rgba(255,255,255,calc(.20 * var(--intensite))) 0%,
-      rgba(255,255,255,calc(.065 * var(--intensite))) 30%, transparent 64%);
-    transition:background .45s cubic-bezier(.22,1,.3,1);
+  /* Le dégradé est FIXE ; c'est l'élément (2x la carte) qu'on déplace.
+     Animer la position d'un dégradé force un repaint à chaque frame —
+     c'était la cause de la latence sur mobile. translate3d est composité. */
+  .halo,.iris{
+    position:absolute; left:-50%; top:-50%; width:200%; height:200%;
+    pointer-events:none; z-index:1; will-change:transform;
   }
-  .iris{
-    background:
-      radial-gradient(58% 44% at calc(50% + var(--mx)*95%) calc(50% + var(--my)*62%),
-        rgba(255,105,200,calc(.20 * var(--intensite))), transparent 62%),
-      radial-gradient(58% 44% at calc(50% + var(--mx)*60%) calc(50% + var(--my)*95%),
-        rgba(150,210,255,calc(.20 * var(--intensite))), transparent 62%);
-    mix-blend-mode:screen;
-    transition:background .45s cubic-bezier(.22,1,.3,1);
+  .halo{
+    background:radial-gradient(33% 25% at 50% 50%,
+      rgba(255,255,255,calc(.20 * var(--intensite))) 0%,
+      rgba(255,255,255,calc(.065 * var(--intensite))) 30%,
+      transparent 64%);
+    transform:translate3d(calc(var(--mx) * 39%), calc(var(--my) * 39%), 0);
+  }
+  .iris{mix-blend-mode:screen}
+  .iris.chaude{
+    background:radial-gradient(29% 22% at 50% 50%,
+      rgba(255,105,200,calc(.22 * var(--intensite))), transparent 62%);
+    transform:translate3d(calc(var(--mx) * 47.5%), calc(var(--my) * 31%), 0);
+  }
+  .iris.froide{
+    background:radial-gradient(29% 22% at 50% 50%,
+      rgba(95,210,255,calc(.22 * var(--intensite))), transparent 62%);
+    transform:translate3d(calc(var(--mx) * 30%), calc(var(--my) * 47.5%), 0);
   }
   .balayage{
     position:absolute; top:-25%; bottom:-25%; left:0; width:38%; z-index:2;
@@ -226,7 +231,7 @@
           <div class="face recto">
             <div class="plan">
               <div class="forme"><img src="assets/forme.svg" alt=""></div>
-              <div class="halo"></div><div class="iris"></div><div class="balayage"></div>
+              <div class="halo"></div><div class="iris chaude"></div><div class="iris froide"></div><div class="balayage"></div>
             </div>
 
             <div class="photo"><img src="assets/photo-romain.png" alt="Romain Legresy"></div>
@@ -244,7 +249,7 @@
           <div class="face verso">
             <div class="plan">
               <div class="forme"><img src="assets/forme.svg" alt=""></div>
-              <div class="halo"></div><div class="iris"></div>
+              <div class="halo"></div><div class="iris chaude"></div><div class="iris froide"></div>
             </div>
 
             <div class="cadre-qr"><img src="qr.svg" alt="QR code vers la carte"></div>
@@ -302,13 +307,15 @@
     suivre(e.clientX, e.clientY);
   }, {passive:true});
 
-  const DUREE_ROTATION = 800;   // doit rester égal à la transition de .pivot
-  let finRotation = null;
+  const DUREE_ROTATION = 700;   // doit rester égal à la transition de .pivot
+  let bascule = null;
   const retourner = () => {
-    carte.classList.add('enrotation');          // les deux faces le temps du mouvement
-    carte.classList.toggle('retournee');
-    clearTimeout(finRotation);
-    finRotation = setTimeout(() => carte.classList.remove('enrotation'), DUREE_ROTATION);
+    carte.classList.toggle('retournee');                 // lance la rotation
+    clearTimeout(bascule);
+    // Échange des faces au moment exact du profil. La courbe est symétrique,
+    // donc 50 % du mouvement = 50 % de la durée.
+    bascule = setTimeout(() => carte.classList.toggle('montreVerso'),
+                         DUREE_ROTATION / 2);
   };
   carte.addEventListener('click', retourner);
   carte.addEventListener('keydown', e => {

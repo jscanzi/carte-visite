@@ -27,10 +27,13 @@ elles, les deux faces se superposent (la face arrière apparaît en miroir) :
 2. Le rognage et le `mix-blend-mode` vivent dans `.plan` (`isolation:isolate`),
    pas sur `.face` : `overflow:hidden` et les fondus sur une face en
    `backface-visibility` cassent le rendu 3D de Safari.
-3. Au repos, **une seule face est rendue** (`opacity`), les deux uniquement
-   pendant la rotation via la classe `.enrotation` posée par le JS. Ce filet
-   ne dépend d'aucun calage temporel. Si tu changes la durée de la transition
-   de `.pivot`, mets `DUREE_ROTATION` à la même valeur.
+3. **On ne se fie plus du tout à `backface-visibility`** : il échoue en
+   pratique sur Safari iOS. **Une seule face est rendue à tout instant**
+   (`opacity`), et l'échange se fait à mi-rotation, quand la carte est de
+   profil — donc invisible. La courbe étant symétrique, 50 % du mouvement
+   = 50 % de la durée. ⚠️ Si tu changes la durée de la transition de
+   `.pivot`, mets `DUREE_ROTATION` à la même valeur, sinon l'échange se
+   voit.
 
 ⚠️ **Le contenu de la carte porte ses couleurs explicitement**, il n'hérite pas
 de `body` : le fond d'écran est clair, l'héritage rendrait le nom sombre sur
@@ -72,6 +75,15 @@ flou gaussien et son dégradé aubergine → transparent d'origine. Les unités
 `hypot()` du code exporté par Figma ne se transposent pas en CSS : le placement
 a été obtenu par **ajustement numérique** contre le rendu Figma (erreur moyenne
 2,6/255 au recto, 5,3/255 au verso). Ne pas « corriger » ces valeurs à vue.
+
+⚠️ **La lumière ne repeint jamais.** Les dégradés sont **fixes** ; ce sont des
+éléments de 2× la taille de la carte qu'on déplace en `translate3d`, composité
+par le GPU. Animer la position d'un dégradé (première version) forçait un
+repaint complet à chaque frame sur quatre éléments : c'était la cause de la
+latence sur mobile. Ne pas revenir à un `background-position` animé.
+
+⚠️ **`format-detection` est obligatoire.** Sans lui, iOS détecte le numéro de
+téléphone et le transforme en lien bleu souligné, même sans balise `<a>`.
 
 **La lumière** est un éclairage rasant : la source est projetée hors de la carte,
 on n'en voit que la retombée. Elle suit une orbite à phase unique qui ne passe
